@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>签条查看</title>
+</head>
+<body>
+    <h2>你抽到的签是：</h2>
+    <form method="GET" action="/">
+        <label for="id">请输入签号：</label>
+        <input type="text" name="id" required />
+        <button type="submit">查看签条</button>
+    </form>
+
+    {% if image_url %}
+    <div>
+        <img src="{{ image_url }}" alt="签条图片" style="max-width: 100%; height: auto;" />
+    </div>
+    {% elif error %}
+    <p style="color:red;">{{ error }}</p>
+    {% endif %}
+</body>
+</html>
