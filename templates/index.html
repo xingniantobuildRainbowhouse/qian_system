@@ -1,23 +1,113 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>签条查看</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 0 15px;
+            background: #f9f9f9;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        form {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        input[type="text"] {
+            width: 200px;
+            padding: 6px 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+        button {
+            padding: 7px 15px;
+            font-size: 16px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            vertical-align: middle;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .instructions {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 14px;
+            color: #555;
+        }
+        .instructions strong {
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: red;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
     <h2>你抽到的签是：</h2>
     <form method="GET" action="/">
         <label for="id">请输入签号：</label>
-        <input type="text" name="id" required />
+        <input type="text" name="id" id="id" placeholder="例如：16人际关系" required />
         <button type="submit">查看签条</button>
     </form>
 
-    {% if image_url %}
-    <div>
-        <img src="{{ image_url }}" alt="签条图片" style="max-width: 100%; height: auto;" />
+    <div class="instructions">
+        <p><strong>签号填写说明：</strong></p>
+        <p>请直接回复您所抽到的书签号（阿拉伯数字）与您所想问的项目，如：“16人际关系”，“53财富增损”，“44风水厄运”等。</p>
+        <p>签号请用阿拉伯数字，如“16”“24”等。</p>
+        <p>项目请从以下11个项目中选取一个：</p>
+        <ul>
+            <li>家宅运气</li>
+            <li>财富增损</li>
+            <li>谋望</li>
+            <li>人际关系</li>
+            <li>诉讼是非</li>
+            <li>出行</li>
+            <li>疾病</li>
+            <li>风水厄运</li>
+            <li>失物</li>
+            <li>请托</li>
+            <li>婚姻</li>
+        </ul>
     </div>
+
+    {% if image_url %}
+        <img src="{{ image_url }}" alt="签条图片" />
     {% elif error %}
-    <p style="color:red;">{{ error }}</p>
+        <p class="error">{{ error }}</p>
     {% endif %}
 </body>
 </html>

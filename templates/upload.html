@@ -1,21 +1,81 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>上传签条</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 0 15px;
+            background: #f9f9f9;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        form {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        label {
+            display: inline-block;
+            width: 70px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        input[type="text"],
+        input[type="file"] {
+            width: calc(100% - 80px);
+            padding: 7px 10px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px 0;
+            font-size: 16px;
+            background-color: #3498db;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .message {
+            margin-top: 25px;
+            text-align: center;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
 </head>
 <body>
     <h2>上传签条图片</h2>
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" action="/upload">
         <label for="id">签号：</label>
-        <input type="text" name="id" required /><br><br>
+        <input type="text" name="id" id="id" placeholder="请输入签号" required /><br />
         <label for="file">选择图片：</label>
-        <input type="file" name="file" accept="image/*" required /><br><br>
+        <input type="file" name="file" id="file" accept="image/*" required /><br />
         <button type="submit">上传</button>
     </form>
 
     {% if message %}
-    <p style="color:green;">{{ message }}</p>
+        <p class="message">{{ message }}</p>
     {% endif %}
 </body>
 </html>
