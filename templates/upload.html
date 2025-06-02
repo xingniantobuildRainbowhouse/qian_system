@@ -12,70 +12,85 @@
             background: #f9f9f9;
             color: #333;
         }
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
+        h1 {
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
         }
-        form {
+        .content {
             background: #fff;
-            border: 1px solid #ddd;
             border-radius: 8px;
             padding: 20px 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
         }
         label {
             display: inline-block;
-            width: 70px;
+            width: 80px;
             font-weight: bold;
+            vertical-align: middle;
             margin-bottom: 10px;
         }
         input[type="text"],
         input[type="file"] {
-            width: calc(100% - 80px);
-            padding: 7px 10px;
-            margin-bottom: 20px;
+            width: calc(100% - 90px);
+            padding: 8px 10px;
             font-size: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
             vertical-align: middle;
+            margin-bottom: 15px;
         }
         button {
-            display: block;
             width: 100%;
-            padding: 10px 0;
-            font-size: 16px;
-            background-color: #3498db;
+            padding: 12px 0;
+            background-color: #4a7cf3;
+            color: white;
             border: none;
             border-radius: 6px;
-            color: white;
+            font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            margin-top: 10px;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #345ecf;
         }
         .message {
-            margin-top: 25px;
+            margin-top: 20px;
             text-align: center;
             font-weight: bold;
             color: green;
         }
+        .hint {
+            color: #555;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding-left: 80px;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
-    <h2>上传签条图片</h2>
-    <form method="POST" enctype="multipart/form-data" action="/upload">
-        <label for="id">签号：</label>
-        <input type="text" name="id" id="id" placeholder="请输入签号" required /><br />
-        <label for="file">选择图片：</label>
-        <input type="file" name="file" id="file" accept="image/*" required /><br />
-        <button type="submit">上传</button>
-    </form>
-
-    {% if message %}
+    <h1>上传签条图片</h1>
+    <div class="content">
+        <form method="POST" enctype="multipart/form-data" action="/upload">
+            <label for="id">签号：</label>
+            <input type="text" id="id" name="id" placeholder="请输入签号" required /><br />
+            <div class="hint">
+                签号格式示例：<br />
+                - <strong>22 家宅运气</strong> 或 <strong>二二 家宅运气</strong><br />
+                - 支持阿拉伯数字或中文数字<br />
+                - 支持简体或繁体<br />
+                - 空格可有可无
+            </div>
+            <label for="file">选择图片：</label>
+            <input type="file" id="file" name="file" accept="image/*" required /><br />
+            <button type="submit">上传</button>
+        </form>
+        {% if message %}
         <p class="message">{{ message }}</p>
-    {% endif %}
+        {% endif %}
+    </div>
 </body>
 </html>
