@@ -5,7 +5,7 @@ import glob
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = os.path.join('static', 'qian_imgs')  # 你的图片存放目录
+UPLOAD_FOLDER = os.path.join('static', 'qian')  # 你的图片存放目录
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -101,19 +101,25 @@ def index():
 
     if raw_id:
         chinese_number, chinese_project = parse_input(raw_id)
+        print(f"解析结果: 数字='{chinese_number}', 项目='{chinese_project}'")  # 打印解析结果
+
         if chinese_number and chinese_project:
-            # 模糊匹配文件名，允许数字和项目名间有空格或无空格
             pattern = os.path.join(app.config['UPLOAD_FOLDER'], f"{chinese_number}*{chinese_project}*.jpg")
+            print(f"匹配模式: {pattern}")
+
             candidates = glob.glob(pattern)
+            print(f"匹配到的文件列表: {candidates}")
+
             if candidates:
                 rel_path = os.path.relpath(candidates[0], 'static')
                 image_url = url_for('static', filename=rel_path)
             else:
                 error = f"签条“{chinese_number} {chinese_project}”不存在。"
         else:
-            error = f"无法识别签号或项目，请确认输入格式正确。"
+            error = f"无法识别“{raw_id}”。请使用正确的签号和项目名。"
 
     return render_template('index.html', image_url=image_url, error=error)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
