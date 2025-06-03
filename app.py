@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, redirect, session, url_for
 import os
 import re
 import glob
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # 替换为安全的密钥字符串
 
-UPLOAD_FOLDER = os.path.join('static', 'qian')  # 你的图片存放目录
+UPLOAD_FOLDER = os.path.join('static', 'qian') # 你的图片存放目录
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -93,8 +94,16 @@ def parse_input(user_input):
     chinese_project = match_project_name(project_part)
     return chinese_number, chinese_project
 
-@app.route('/', methods=['GET'])
-def index():
+@app.route('/')
+def pay():
+    return render_template('pay.html')
+
+@app.route('/query', methods=['GET'])
+def query():
+    # 如果没有付费记录，跳转付款页
+    if not session.get('paid'):
+        return redirect(url_for('pay'))
+
     raw_id = request.args.get('id', '').strip()
     image_url = None
     error = None
@@ -106,13 +115,13 @@ def index():
         if chinese_number and chinese_project:
             pattern = os.path.join(app.config['UPLOAD_FOLDER'], f"{chinese_number}*{chinese_project}*.jpg")
             print(f"匹配模式: {pattern}")
-
             candidates = glob.glob(pattern)
             print(f"匹配到的文件列表: {candidates}")
 
             if candidates:
                 rel_path = os.path.relpath(candidates[0], 'static')
                 image_url = url_for('static', filename=rel_path)
+                session['paid'] = False  # 查询完自动清除一次查询权限
             else:
                 error = f"签条“{chinese_number} {chinese_project}”不存在。"
         else:
@@ -120,6 +129,10 @@ def index():
 
     return render_template('index.html', image_url=image_url, error=error)
 
+@app.route('/confirm', methods=['POST'])
+def confirm():
+    session['paid'] = True
+    return redirect(url_for('query'))
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
