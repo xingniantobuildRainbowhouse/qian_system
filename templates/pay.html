@@ -50,7 +50,7 @@
     <h1>请扫码付款 ¥20，获取一次签条查询</h1>
     <p>请选择您所在的门店，然后扫码付款：</p>
 
-    <form method="POST" action="{{ url_for('confirm_payment') }}">
+    <form method="POST" action="{{ url_for('confirm') }}" onsubmit="return checkBranchSelected()">
         <label for="branch">选择门店：</label><br>
         <select name="branch" id="branch" required onchange="updateQRCode()">
             <option value="" disabled selected>请选择门店</option>
@@ -84,6 +84,15 @@
             } else {
                 img.style.display = 'none';
             }
+        }
+
+        function checkBranchSelected() {
+            const select = document.getElementById('branch');
+            if (!select.value) {
+                alert("请选择一个门店后再提交。");
+                return false;
+            }
+            return true;
         }
     </script>
 </body>

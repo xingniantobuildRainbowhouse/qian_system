@@ -8,20 +8,39 @@
             font-family: "Microsoft YaHei", sans-serif;
             text-align: center;
             margin-top: 50px;
+            background-color: #f9f9f9;
+            color: #333;
         }
         input[type="text"] {
             width: 300px;
             height: 30px;
             font-size: 16px;
-            padding: 5px;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         button {
             font-size: 16px;
-            padding: 5px 15px;
+            padding: 6px 20px;
             margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
         }
         .image-wrapper {
             margin-top: 30px;
+        }
+        .image-wrapper img {
+            max-width: 90%;
+            height: auto;
+            border: 1px solid #ccc;
+            padding: 6px;
+            background: #fff;
         }
         .instructions {
             font-size: 16px;
@@ -49,20 +68,31 @@
         家宅运气、财富增损、谋望、人际关系、诉讼是非、出行、疾病、风水厄运、失物、请托、婚姻
     </div>
 
-    <form method="get">
-        <input type="text" name="id" placeholder="请输入签号和项目名称" required>
+    <form method="get" action="{{ url_for('query') }}" onsubmit="return checkInput()">
+        <input type="text" name="id" id="id" placeholder="请输入签号与项目名称" required>
         <br>
         <button type="submit">查询签条</button>
     </form>
 
-    {% if image_url %}
-        <div class="image-wrapper">
-            <img src="{{ image_url }}" alt="签条图片" style="max-width: 90%; height: auto;">
-        </div>
-    {% endif %}
-
     {% if error %}
         <div class="error">{{ error }}</div>
     {% endif %}
+
+    {% if image_url %}
+        <div class="image-wrapper">
+            <img src="{{ image_url }}" alt="签条图片">
+        </div>
+    {% endif %}
+
+    <script>
+        function checkInput() {
+            const input = document.getElementById('id');
+            if (!input.value.trim()) {
+                alert("请输入签号和项目名称");
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>

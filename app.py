@@ -6,7 +6,7 @@ import glob
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 替换为安全的密钥字符串
 
-UPLOAD_FOLDER = os.path.join('static', 'qian') # 你的图片存放目录
+UPLOAD_FOLDER = os.path.join('static', 'qian')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -46,7 +46,6 @@ def match_project_name(input_name):
     return None
 
 def arabic_to_chinese_str(num_str):
-    # 把两位阿拉伯数字转成两位中文数字字符串，如 "22"->"二二"
     if len(num_str) != 2 or not num_str.isdigit():
         return None
     result = ''
@@ -59,9 +58,6 @@ def arabic_to_chinese_str(num_str):
     return result
 
 def convert_chinese_numerals(text):
-    # 将中文数字字符串转成两位中文数字字符串，支持“二十三”“十三”“十七”“十”等
-    if not text:
-        return None
     text = text.strip()
     if re.fullmatch(r'[一二三四五六七八九十〇零]+', text):
         if '十' in text:
@@ -70,14 +66,11 @@ def convert_chinese_numerals(text):
             right = CHINESE_NUM_MAP.get(parts[1], 0) if len(parts) > 1 and parts[1] else 0
             number = left * 10 + right
         else:
-            number = 0
-            for c in text:
-                number = number * 10 + CHINESE_NUM_MAP.get(c, 0)
+            number = sum(CHINESE_NUM_MAP.get(c, 0) * (10 ** i) for i, c in enumerate(reversed(text)))
         return arabic_to_chinese_str(f"{number:02d}")
     return None
 
 def parse_input(user_input):
-    # 提取数字 + 项目名，返回格式为(两位中文数字, 繁体项目名)
     cleaned = user_input.replace(" ", "").strip()
     match = re.match(r'^([0-9]{2}|[一二三四五六七八九十〇零]{1,3})(.*)$', cleaned)
     if not match:
@@ -100,7 +93,6 @@ def pay():
 
 @app.route('/query', methods=['GET'])
 def query():
-    # 如果没有付费记录，跳转付款页
     if not session.get('paid'):
         return redirect(url_for('pay'))
 
@@ -110,18 +102,18 @@ def query():
 
     if raw_id:
         chinese_number, chinese_project = parse_input(raw_id)
-        print(f"解析结果: 数字='{chinese_number}', 项目='{chinese_project}'")  # 打印解析结果
+        print(f"解析结果: 数字='{chinese_number}', 项目='{chinese_project}'")
 
         if chinese_number and chinese_project:
             pattern = os.path.join(app.config['UPLOAD_FOLDER'], f"{chinese_number}*{chinese_project}*.jpg")
-            print(f"匹配模式: {pattern}")
             candidates = glob.glob(pattern)
-            print(f"匹配到的文件列表: {candidates}")
+            print(f"匹配模式: {pattern}")
+            print(f"匹配到的文件: {candidates}")
 
             if candidates:
                 rel_path = os.path.relpath(candidates[0], 'static')
                 image_url = url_for('static', filename=rel_path)
-                session['paid'] = False  # 查询完自动清除一次查询权限
+                session['paid'] = False  # 清除权限，只能查一次
             else:
                 error = f"签条“{chinese_number} {chinese_project}”不存在。"
         else:
@@ -132,6 +124,9 @@ def query():
 @app.route('/confirm', methods=['POST'])
 def confirm():
     session['paid'] = True
+    branch = request.form.get('branch')
+    if branch:
+        print(f"用户选择门店：{branch}")
     return redirect(url_for('query'))
 
 if __name__ == '__main__':
