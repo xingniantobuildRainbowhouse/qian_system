@@ -20,7 +20,6 @@ CHINESE_NUM_MAP = {
 }
 REVERSE_NUM_MAP = {v: k for k, v in CHINESE_NUM_MAP.items() if v <= 9}
 
-# 简体 → 繁体项目词映射（含模糊别名）
 TERM_ALIASES = {
     '家宅运气': ['家宅運氣'],
     '财富增损': ['財富增損'],
@@ -91,6 +90,12 @@ def parse_input(user_input):
 def pay():
     return render_template('pay.html')
 
+@app.route('/index')
+def index():
+    if not session.get('paid'):
+        return redirect(url_for('pay'))
+    return render_template('index.html')
+
 @app.route('/query', methods=['GET'])
 def query():
     if not session.get('paid'):
@@ -111,9 +116,9 @@ def query():
             print(f"匹配到的文件: {candidates}")
 
             if candidates:
-                rel_path = os.path.relpath(candidates[0], 'static')
+                rel_path = os.path.relpath(candidates[0], 'static').replace('\\', '/')
                 image_url = url_for('static', filename=rel_path)
-                session['paid'] = False  # 清除权限，只能查一次
+                session.pop('paid', None)  # 查询后清除查询权限
             else:
                 error = f"签条“{chinese_number} {chinese_project}”不存在。"
         else:
@@ -123,11 +128,11 @@ def query():
 
 @app.route('/confirm', methods=['POST'])
 def confirm():
-    session['paid'] = True
     branch = request.form.get('branch')
     if branch:
         print(f"用户选择门店：{branch}")
-    return redirect(url_for('query'))
+    session['paid'] = True
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
