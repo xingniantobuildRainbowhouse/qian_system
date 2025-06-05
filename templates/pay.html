@@ -56,8 +56,8 @@
         <select name="branch" id="branch" required onchange="updateQRCode()">
             <option value="" disabled selected>请选择门店</option>
             <option value="hangzhouqiantang">总店（不在任一店内也请选择此项）</option>
-            ## <option value="shanghai">上海分店</option>
-            ## <option value="chengdu">成都分店</option>
+            <option value="shanghai">上海分店</option>
+            <option value="chengdu">成都分店</option>
         </select>
 
         <div style="text-align: center;">
@@ -71,8 +71,8 @@
     <script>
         const qrcodes = {
             hangzhouqiantang: "{{ url_for('static', filename='qrcode_hangzhouqiantang.png') }}",
-           # shanghai: "{{ url_for('static', filename='qrcode_shanghai.png') }}",
-           # chengdu: "{{ url_for('static', filename='qrcode_chengdu.png') }}"
+            shanghai: "{{ url_for('static', filename='qrcode_shanghai.png') }}",
+             chengdu: "{{ url_for('static', filename='qrcode_chengdu.png') }}"
         };
 
         function updateQRCode() {
