@@ -118,7 +118,9 @@ def query():
             if candidates:
                 rel_path = os.path.relpath(candidates[0], 'static').replace('\\', '/')
                 image_url = url_for('static', filename=rel_path)
-                session.pop('paid', None)  # 查询后清除查询权限
+
+                # 成功查询后清除查询权限（只能查询一次）
+                session.pop('paid', None)
             else:
                 error = f"签条“{chinese_number} {chinese_project}”不存在。"
         else:
@@ -126,13 +128,14 @@ def query():
 
     return render_template('index.html', image_url=image_url, error=error)
 
+
 @app.route('/confirm', methods=['POST'])
 def confirm():
     branch = request.form.get('branch')
     if branch:
         print(f"用户选择门店：{branch}")
     session['paid'] = True
-    return redirect(url_for('index'))
+    return redirect(url_for('query'))  #  改为跳转到 query 页面
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
