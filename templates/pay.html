@@ -58,25 +58,14 @@
             margin-top: 6px;  /* 给select顶部加点间距 */
         }
         @media screen and (max-width: 600px) {
-                   body {
-                           font-size: 28px;
-                    }
-                    h1 {
-                           font-size: 36px;
-                     }
-                     p, .note, label[for="branch"] {
-                           font-size: 28px;
-                     }
-                     select#branch {
-                           font-size: 28px;
-                           padding: 10px 14px;   /* 更好点击 */
-                           width: 280px;         /* 稍宽一点 */
-                     }
-                     button {
-                           font-size: 30px;
-                           padding: 20px 60px;   /* 更高按钮，手指点着更舒服 */
-                     }   /* 手机页面放大 */
-          }
+              body {
+                      /* 手机页面整体放大1.2倍 */
+                      transform: scale(1.2);
+                      transform-origin: top center; /* 以顶部中间为缩放中心 */
+                      width: 83.33%; /* 100% / 1.2，避免缩放后页面宽度溢出 */
+                      margin: 0 auto; /* 居中 */
+              }
+          } 
     </style>
 </head>
 <body>

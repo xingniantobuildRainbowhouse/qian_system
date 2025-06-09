@@ -57,35 +57,14 @@
             font-size: 36px;
         }
         @media screen and (max-width: 600px) {
-             body {
-                    font-size: 30px;
-             }
-             h1 {
-                    font-size: 38px;
-             }
-             .instructions {
-                    font-size: 28px;
-             }
-             input[type="text"] {
-                    width: 90%;
-                    font-size: 30px;
-             }
-             button {
-                    font-size: 32px;
-                    padding: 24px 64px;
-             }
-             .error {
-                    font-size: 40px;
-             }
-             select#branch {
-                    font-size: 30px;
-                    padding: 10px 14px;
-                    width: 300px;
-             }
-             .note {
-                    font-size: 24px;
-             }      /* 手机页面放大 */
-        }
+              body {
+                      /* 手机页面整体放大1.2倍 */
+                      transform: scale(1.2);
+                      transform-origin: top center; /* 以顶部中间为缩放中心 */
+                      width: 83.33%; /* 100% / 1.2，避免缩放后页面宽度溢出 */
+                      margin: 0 auto; /* 居中 */
+              }
+          } 
     </style>
 </head>
 <body>
