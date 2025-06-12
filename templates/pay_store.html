@@ -122,8 +122,8 @@
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    if (data.paid === true) {
-                        // 付款成功，跳转查询页面
+                    if (data.paid === true) { 
+                        clearInterval(timer);  // ✅ 停止定时器，防止页面未跳转时重复请求
                         window.location.href = '/query';
                     }
                 })

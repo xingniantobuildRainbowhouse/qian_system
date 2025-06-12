@@ -6,7 +6,7 @@ import redis
 import datetime
 
 # Redis 连接配置
-REDIS_URL = os.getenv("REDIS_URL", "redis://red-d14oianfte5s738o91v0:6379")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
 
 app = Flask(__name__)
