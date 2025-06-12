@@ -10,10 +10,10 @@
             background-color: #f9f9f9;
             padding-top: 80px;
             color: #333;
-            font-size: 24px; /* 整体字体变大 */
+            font-size: 24px;
         }
         h1 {
-            font-size: 30px; /* 标题更大 */
+            font-size: 30px;
             margin-bottom: 20px;
         }
         p {
@@ -33,89 +33,90 @@
             font-size: 20px;
             margin-top: 20px;
         }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 16px 50px;
-            font-size: 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 36px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        label[for="branch"] {
-            display: inline-block;
-            margin-bottom: 12px;  /* 给label底部加点间距 */
-        }
-        /* 在这里加门店选择框样式 */
-        select#branch {
+        #loading {
+            margin-top: 30px;
             font-size: 22px;
-            padding: 8px 12px;
-            width: 250px;
-            margin-top: 6px;  /* 给select顶部加点间距 */
+            color: #888;
         }
         @media screen and (max-width: 600px) {
-              body {
-                      /* 手机页面整体放大1.2倍 */
-                      transform: scale(1.2);
-                      transform-origin: top center; /* 以顶部中间为缩放中心 */
-                      width: 83.33%; /* 100% / 1.2，避免缩放后页面宽度溢出 */
-                      margin: 0 auto; /* 居中 */
-              }
-          } 
+            body {
+                transform: scale(1.2);
+                transform-origin: top center;
+                width: 83.33%;
+                margin: 0 auto;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>请扫码付款 ¥20，获取一次签条查询</h1>
-    <p>请选择您所在的门店，然后扫码付款：</p>
+    <p>请使用微信扫描下方二维码（总店收款码）：</p>
+    
+    <img src="{{ url_for('static', filename='zongdian.png') }}" alt="付款二维码">
 
-    <form method="POST" action="{{ url_for('confirm') }}" onsubmit="return checkBranchSelected()">
-        <label for="branch">选择门店：</label><br>
-        <select name="branch" id="branch" required onchange="updateQRCode()">
-            <option value="" disabled selected>请选择门店</option>
-            <option value="hangzhouqiantang">总店（不在任一店内也请选择此项）</option>
-            <option value="shanghai">上海分店</option>
-            <option value="chengdu">成都分店</option>
-        </select>
-
-        <div style="text-align: center;">
-            <img id="qrcode-img" src="" alt="付款二维码" style="display: none; margin: 0 auto;">
-    </div>
-
-        <p class="note">付款后请点击下方按钮，进入抽签查询页面</p>
-        <button type="submit">我已付款</button>
-    </form>
+    <p class="note">系统正在检测您的付款状态，请稍候……</p>
+    <div id="loading">正在查询付款记录中...</div>
 
     <script>
-        const qrcodes = {
-            hangzhouqiantang: "{{ url_for('static', filename='qrcode_hangzhouqiantang.png') }}",
-            shanghai: "{{ url_for('static', filename='qrcode_shanghai.png') }}",
-             chengdu: "{{ url_for('static', filename='qrcode_chengdu.png') }}"
-        };
+        // 生成UUID v4，简单版本
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
 
-        function updateQRCode() {
-            const select = document.getElementById('branch');
-            const value = select.value;
-            const img = document.getElementById('qrcode-img');
-            if (value && qrcodes[value]) {
-                img.src = qrcodes[value];
-                img.style.display = 'block';
+        // 从Cookie获取指定名称的值
+        function getCookie(name) {
+            const value = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return value ? value.pop() : null;
+        }
+
+        // 设置Cookie，path=/，有效期7天
+        function setCookie(name, value, days=7) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+        }
+
+        // 页面加载时，确保visitor_id存在Cookie中
+        function ensureVisitorId() {
+            let visitorId = getCookie('visitor_id');
+            if (!visitorId) {
+                visitorId = generateUUID();
+                setCookie('visitor_id', visitorId);
+                console.log('新visitor_id已生成:', visitorId);
             } else {
-                img.style.display = 'none';
+                console.log('已有visitor_id:', visitorId);
             }
+            return visitorId;
         }
 
-        function checkBranchSelected() {
-            const select = document.getElementById('branch');
-            if (!select.value) {
-                alert("请选择一个门店后再提交。");
-                return false;
-            }
-            return true;
+        const branch = "zongdian";
+        const visitorId = ensureVisitorId();
+
+        // 每隔3秒向后端发送请求检测是否有付款记录，同时带上visitor_id
+        const checkInterval = 3000; // 3秒
+
+        function checkPayment() {
+            fetch(`/check_payment/${branch}`, {
+                headers: {
+                    'Visitor-Id': visitorId
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.paid === true) { 
+                    clearInterval(timer);  // ✅ 停止定时器，防止页面未跳转时重复请求
+                    window.location.href = '/query';
+                }
+            })
+            .catch(error => {
+                console.error("付款检查失败:", error);
+            });
         }
+
+        setInterval(checkPayment, checkInterval);
     </script>
 </body>
 </html>
