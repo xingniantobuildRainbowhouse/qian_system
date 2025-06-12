@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>扫码付款 · 抽签系统</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f9f9f9;
+            padding-top: 80px;
+            color: #333;
+            font-size: 24px; /* 整体字体变大 */
+        }
+        h1 {
+            font-size: 30px; /* 标题更大 */
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 24px;
+            margin: 12px 0;
+        }
+        img {
+            display: block;
+            margin: 20px auto;
+            width: 260px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            background-color: white;
+        }
+        .note {
+            color: #666;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px 50px;
+            font-size: 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 36px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        label[for="branch"] {
+            display: inline-block;
+            margin-bottom: 12px;  /* 给label底部加点间距 */
+        }
+        /* 在这里加门店选择框样式 */
+        select#branch {
+            font-size: 22px;
+            padding: 8px 12px;
+            width: 250px;
+            margin-top: 6px;  /* 给select顶部加点间距 */
+        }
+        @media screen and (max-width: 600px) {
+              body {
+                      /* 手机页面整体放大1.2倍 */
+                      transform: scale(1.2);
+                      transform-origin: top center; /* 以顶部中间为缩放中心 */
+                      width: 83.33%; /* 100% / 1.2，避免缩放后页面宽度溢出 */
+                      margin: 0 auto; /* 居中 */
+              }
+          } 
+    </style>
+</head>
+<body>
+    <h1>请扫码付款 ¥20，获取一次签条查询</h1>
+    <p>请选择您所在的门店，然后扫码付款：</p>
+
+    <form method="POST" action="{{ url_for('confirm') }}" onsubmit="return checkBranchSelected()">
+        <label for="branch">选择门店：</label><br>
+        <select name="branch" id="branch" required onchange="updateQRCode()">
+            <option value="" disabled selected>请选择门店</option>
+            <option value="hangzhouqiantang">总店（不在任一店内也请选择此项）</option>
+            <option value="shanghai">上海分店</option>
+            <option value="chengdu">成都分店</option>
+        </select>
+
+        <div style="text-align: center;">
+            <img id="qrcode-img" src="" alt="付款二维码" style="display: none; margin: 0 auto;">
+    </div>
+
+        <p class="note">付款后请点击下方按钮，进入抽签查询页面</p>
+        <button type="submit">我已付款</button>
+    </form>
+
+    <script>
+        const qrcodes = {
+            hangzhouqiantang: "{{ url_for('static', filename='qrcode_hangzhouqiantang.png') }}",
+            shanghai: "{{ url_for('static', filename='qrcode_shanghai.png') }}",
+             chengdu: "{{ url_for('static', filename='qrcode_chengdu.png') }}"
+        };
+
+        function updateQRCode() {
+            const select = document.getElementById('branch');
+            const value = select.value;
+            const img = document.getElementById('qrcode-img');
+            if (value && qrcodes[value]) {
+                img.src = qrcodes[value];
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+        }
+
+        function checkBranchSelected() {
+            const select = document.getElementById('branch');
+            if (!select.value) {
+                alert("请选择一个门店后再提交。");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>
