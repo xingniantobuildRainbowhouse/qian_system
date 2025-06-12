@@ -5,9 +5,13 @@ import glob
 import redis
 import datetime
 
-# Redis 连接配置
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+
+# ✅ 直接使用 Render 提供的 Redis 外部连接地址
+REDIS_URL = "rediss://red-d14oianfte5s738o91v0:d1WRv1xYaO3zVf1ECyN6UuSPbvOFDiDB@oregon-keyvalue.render.com:6379"
+
+# ✅ 创建 Redis 客户端，启用 decode_responses=True 返回字符串
 redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
