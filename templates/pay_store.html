@@ -94,15 +94,14 @@
             return params.get('branch') || 'zongdian';
         }
 
-        // 设置二维码图片路径，和二维码文件名约定：
-        // zongdian.png 和 lisenmiao.png，存放在 /static/ 目录下
+        // ✅ 修正路径：从 static/qrcode/ 获取二维码
         function setQRCodeImage(branch) {
             const qrImg = document.getElementById('qrCodeImg');
-            const validBranches = ['zongdian', 'lisenmiao']; // 可扩展
+            const validBranches = ['zongdian', 'lisenmiao', 'chengdu', 'shanghai']; // 可扩展
             if (!validBranches.includes(branch)) {
-                branch = 'zongdian'; // 默认总店
+                branch = 'zongdian';
             }
-            qrImg.src = `/static/${branch}.png`;
+            qrImg.src = `/static/qrcode/${branch}.png`;
             qrImg.alt = `${branch}门店付款二维码`;
         }
 
@@ -110,7 +109,6 @@
         setQRCodeImage(branch);
 
         const visitorId = ensureVisitorId();
-
         // 每隔3秒检测付款状态
         const checkInterval = 3000;
 
