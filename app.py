@@ -2,14 +2,7 @@ from flask import Flask, render_template, request, redirect, session, url_for, j
 import os
 import re
 import glob
-import redis
-import datetime
 
-# ✅ 直接使用 Render 提供的 Redis 外部连接地址
-REDIS_URL = "rediss://red-d14oianfte5s738o91v0:d1WRv1xYaO3zVf1ECyN6UuSPbvOFDiDB@oregon-keyvalue.render.com:6379"
-
-# ✅ 创建 Redis 客户端，启用 decode_responses=True 返回字符串
-redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -111,23 +104,6 @@ def index():
     if not session.get('paid'):
         return redirect(url_for('pay_online'))
     return render_template('index.html')
-
-@app.route('/check_payment/<branch>')
-def check_payment(branch):
-    visitor_id = request.headers.get('Visitor-Id')
-    if not visitor_id:
-        return jsonify({'paid': False, 'error': '缺少 visitor_id'})
-
-    key = f"paid:{branch}:{visitor_id}"
-    paid = redis_client.get(key)
-
-    if paid == '1':
-        session['paid'] = True
-        session['branch'] = branch
-        redis_client.delete(key)  # 用完就删，确保一次有效
-        return jsonify({'paid': True})
-    else:
-        return jsonify({'paid': False})
 
 @app.route('/query')
 def query():

@@ -60,12 +60,20 @@
     <h1>请扫码付款 ¥20，获取一次签条查询</h1>
     <p>请使用微信扫描下方二维码（总店收款码）：</p>
 
-    <img src="{{ url_for('static', filename='zongdian.png') }}" alt="付款二维码">
+    <img src="{{ url_for('static', filename='qrcode/zongdian.png') }}" alt="付款二维码">
 
     <p class="note">付款后请点击下方按钮，进入抽签查询页面</p>
 
-    <form method="POST" action="{{ url_for('confirm_zongdian') }}">
+    <form method="POST" action="{{ url_for('confirm') }}">
         <button type="submit">我已付款</button>
     </form>
+    <script>
+          document.querySelector("form").addEventListener("submit", function () {
+                  const button = document.querySelector("button");
+                  button.disabled = true;
+                  button.innerText = "跳轉中...";
+          });
+</script>
+
 </body>
 </html>
