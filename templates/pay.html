@@ -70,52 +70,13 @@
 </head>
 <body>
     <h1>请扫码付款 ¥20，获取一次签条查询</h1>
-    <p>请选择您所在的门店，然后扫码付款：</p>
+    <p>请使用微信扫描下方二维码（总店收款码）：</p>
 
-    <form method="POST" action="{{ url_for('confirm') }}" onsubmit="return checkBranchSelected()">
-        <label for="branch">选择门店：</label><br>
-        <select name="branch" id="branch" required onchange="updateQRCode()">
-            <option value="" disabled selected>请选择门店</option>
-            <option value="hangzhouqiantang">总店（不在任一店内也请选择此项）</option>
-            <option value="shanghai">上海分店</option>
-            <option value="chengdu">成都分店</option>
-        </select>
-
-        <div style="text-align: center;">
-            <img id="qrcode-img" src="" alt="付款二维码" style="display: none; margin: 0 auto;">
-    </div>
+    <img src="{{ url_for('static', filename='zongdian.png') }}" alt="付款二维码">
 
         <p class="note">付款后请点击下方按钮，进入抽签查询页面</p>
         <button type="submit">我已付款</button>
     </form>
 
-    <script>
-        const qrcodes = {
-            hangzhouqiantang: "{{ url_for('static', filename='qrcode_hangzhouqiantang.png') }}",
-            shanghai: "{{ url_for('static', filename='qrcode_shanghai.png') }}",
-             chengdu: "{{ url_for('static', filename='qrcode_chengdu.png') }}"
-        };
-
-        function updateQRCode() {
-            const select = document.getElementById('branch');
-            const value = select.value;
-            const img = document.getElementById('qrcode-img');
-            if (value && qrcodes[value]) {
-                img.src = qrcodes[value];
-                img.style.display = 'block';
-            } else {
-                img.style.display = 'none';
-            }
-        }
-
-        function checkBranchSelected() {
-            const select = document.getElementById('branch');
-            if (!select.value) {
-                alert("请选择一个门店后再提交。");
-                return false;
-            }
-            return true;
-        }
-    </script>
 </body>
 </html>

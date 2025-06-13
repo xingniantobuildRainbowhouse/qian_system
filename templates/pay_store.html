@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>扫码付款 · 分店</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f9f9f9;
+            padding-top: 80px;
+            color: #333;
+            font-size: 24px;
+        }
+        h1 {
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 24px;
+            margin: 12px 0;
+        }
+        img {
+            display: block;
+            margin: 30px auto;
+            width: 260px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            background-color: white;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px 50px;
+            font-size: 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 36px;
+        }
+        #loading {
+            margin-top: 30px;
+            font-size: 22px;
+            color: #888;
+        }
+        @media screen and (max-width: 600px) {
+            body {
+                transform: scale(1.2);
+                transform-origin: top center;
+                width: 83.33%;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>请扫码付款 ¥20，获取一次签条查询</h1>
+    <p>付款后请点击下方按钮进入查询</p>
+
+    <img src="{{ url_for('static', filename='qrcode/' + branch + '.png') }}" alt="二维码">
+
+    <form method="POST" action="{{ url_for('confirm_store') + '?branch=' + branch }}">
+        <button type="submit">我已付款</button>
+    </form>
+</body>
+</html>

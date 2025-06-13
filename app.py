@@ -90,6 +90,21 @@ def parse_input(user_input):
 def pay():
     return render_template('pay.html')
 
+@app.route('/confirm', methods=['POST'])
+def confirm():
+    session['paid'] = True
+    return redirect(url_for('index'))
+
+@app.route('/pay_store')
+def pay_store():
+    branch = request.args.get('branch', '')
+    return render_template('pay_store.html', branch=branch)
+
+@app.route('/confirm_store', methods=['POST'])
+def confirm_store():
+    session['paid'] = True
+    return redirect(url_for('index'))
+
 @app.route('/index')
 def index():
     if not session.get('paid'):
@@ -107,36 +122,16 @@ def query():
 
     if raw_id:
         chinese_number, chinese_project = parse_input(raw_id)
-        print(f"解析结果: 数字='{chinese_number}', 项目='{chinese_project}'")
-
         if chinese_number and chinese_project:
             pattern = os.path.join(app.config['UPLOAD_FOLDER'], f"{chinese_number}*{chinese_project}*.jpg")
-            candidates = glob.glob(pattern)
-            print(f"匹配模式: {pattern}")
-            print(f"匹配到的文件: {candidates}")
-
-            if candidates:
-                rel_path = os.path.relpath(candidates[0], 'static').replace('\\', '/')
-                image_url = url_for('static', filename=rel_path)
-
-                # 成功查询后清除查询权限（只能查询一次）
-                session.pop('paid', None)
+            matches = glob.glob(pattern)
+            if matches:
+                image_url = '/' + matches[0].replace('\\', '/')
             else:
-                error = f"签条“{chinese_number} {chinese_project}”不存在。"
+                error = "未找到对应的签条，请检查输入。"
         else:
-            error = f"无法识别“{raw_id}”。请使用正确的签号和项目名。"
+            error = "输入格式错误，请重新填写。"
 
+    # 查询一次后清除 session 权限
+    session.pop('paid', None)
     return render_template('index.html', image_url=image_url, error=error)
-
-
-@app.route('/confirm', methods=['POST'])
-def confirm():
-    branch = request.form.get('branch')
-    if branch:
-        print(f"用户选择门店：{branch}")
-    session['paid'] = True
-    return redirect(url_for('query'))  #  改为跳转到 query 页面
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
