@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
@@ -33,10 +33,18 @@
             font-size: 20px;
             margin-top: 20px;
         }
-        #loading {
-            margin-top: 30px;
-            font-size: 22px;
-            color: #888;
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px 50px;
+            font-size: 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 36px;
+        }
+        button:hover {
+            background-color: #45a049;
         }
         @media screen and (max-width: 600px) {
             body {
@@ -51,72 +59,13 @@
 <body>
     <h1>请扫码付款 ¥20，获取一次签条查询</h1>
     <p>请使用微信扫描下方二维码（总店收款码）：</p>
-    
+
     <img src="{{ url_for('static', filename='zongdian.png') }}" alt="付款二维码">
 
-    <p class="note">系统正在检测您的付款状态，请稍候……</p>
-    <div id="loading">正在查询付款记录中...</div>
+    <p class="note">付款后请点击下方按钮，进入抽签查询页面</p>
 
-    <script>
-        // 生成UUID v4，简单版本
-        function generateUUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
-
-        // 从Cookie获取指定名称的值
-        function getCookie(name) {
-            const value = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-            return value ? value.pop() : null;
-        }
-
-        // 设置Cookie，path=/，有效期7天
-        function setCookie(name, value, days=7) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
-        }
-
-        // 页面加载时，确保visitor_id存在Cookie中
-        function ensureVisitorId() {
-            let visitorId = getCookie('visitor_id');
-            if (!visitorId) {
-                visitorId = generateUUID();
-                setCookie('visitor_id', visitorId);
-                console.log('新visitor_id已生成:', visitorId);
-            } else {
-                console.log('已有visitor_id:', visitorId);
-            }
-            return visitorId;
-        }
-
-        const branch = "zongdian";
-        const visitorId = ensureVisitorId();
-
-        // 每隔3秒向后端发送请求检测是否有付款记录，同时带上visitor_id
-        const checkInterval = 3000; // 3秒
-
-        function checkPayment() {
-            fetch(`/check_payment/${branch}`, {
-                headers: {
-                    'Visitor-Id': visitorId
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.paid === true) { 
-                    clearInterval(timer);  // ✅ 停止定时器，防止页面未跳转时重复请求
-                    window.location.href = '/query';
-                }
-            })
-            .catch(error => {
-                console.error("付款检查失败:", error);
-            });
-        }
-
-        setInterval(checkPayment, checkInterval);
-    </script>
+    <form method="POST" action="{{ url_for('confirm_zongdian') }}">
+        <button type="submit">我已付款</button>
+    </form>
 </body>
 </html>
