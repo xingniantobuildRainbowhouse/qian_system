@@ -1,17 +1,24 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify 
 import os
 import re
 import glob
+import redis
+import datetime
+
+# ✅ 直接使用 Render 提供的 Redis 外部连接地址
+REDIS_URL = "rediss://red-d14oianfte5s738o91v0:d1WRv1xYaO3zVf1ECyN6UuSPbvOFDiDB@oregon-keyvalue.render.com:6379"
+
+# ✅ 创建 Redis 客户端，启用 decode_responses=True 返回字符串
+redis_client = redis.StrictRedis.from_url(REDIS_URL, decode_responses=True)
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # 替换为安全的密钥字符串
+app.secret_key = 'your_secret_key'
 
 UPLOAD_FOLDER = os.path.join('static', 'qian')
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# 中文数字映射
+# ========== 工具函数 ==========
 CHINESE_NUM_MAP = {
     '零': 0, '〇': 0,
     '一': 1, '二': 2, '三': 3, '四': 4,
@@ -50,11 +57,8 @@ def arabic_to_chinese_str(num_str):
     result = ''
     for ch in num_str:
         digit = int(ch)
-        if digit in REVERSE_NUM_MAP:
-            result += REVERSE_NUM_MAP[digit]
-        else:
-            return None
-    return result
+        result += REVERSE_NUM_MAP.get(digit, '')
+    return result if len(result) == 2 else None
 
 def convert_chinese_numerals(text):
     text = text.strip()
@@ -78,17 +82,14 @@ def parse_input(user_input):
     number_part = match.group(1)
     project_part = match.group(2)
 
-    if number_part.isdigit():
-        chinese_number = arabic_to_chinese_str(number_part)
-    else:
-        chinese_number = convert_chinese_numerals(number_part)
-
+    chinese_number = arabic_to_chinese_str(number_part) if number_part.isdigit() else convert_chinese_numerals(number_part)
     chinese_project = match_project_name(project_part)
     return chinese_number, chinese_project
 
+# ========== 页面路由 ==========
 @app.route('/')
-def pay():
-    return render_template('pay.html')
+def pay_online():
+    return render_template('pay_online.html')
 
 @app.route('/confirm', methods=['POST'])
 def confirm():
@@ -108,14 +109,32 @@ def confirm_store():
 @app.route('/index')
 def index():
     if not session.get('paid'):
-        return redirect(url_for('pay'))
+        return redirect(url_for('pay_online'))
     return render_template('index.html')
 
-@app.route('/query', methods=['GET'])
+@app.route('/check_payment/<branch>')
+def check_payment(branch):
+    visitor_id = request.headers.get('Visitor-Id')
+    if not visitor_id:
+        return jsonify({'paid': False, 'error': '缺少 visitor_id'})
+
+    key = f"paid:{branch}:{visitor_id}"
+    paid = redis_client.get(key)
+
+    if paid == '1':
+        session['paid'] = True
+        session['branch'] = branch
+        redis_client.delete(key)  # 用完就删，确保一次有效
+        return jsonify({'paid': True})
+    else:
+        return jsonify({'paid': False})
+
+@app.route('/query')
 def query():
     if not session.get('paid'):
-        return redirect(url_for('pay'))
+        return redirect(url_for('pay_online'))
 
+    branch = session.get('branch', 'unknown')
     raw_id = request.args.get('id', '').strip()
     image_url = None
     error = None
@@ -135,3 +154,16 @@ def query():
     # 查询一次后清除 session 权限
     session.pop('paid', None)
     return render_template('index.html', image_url=image_url, error=error)
+
+# ========== 测试设置付款记录 ==========
+@app.route('/mock_pay/<branch>/<visitor_id>', methods=['GET'])
+def mock_pay(branch, visitor_id):
+    # 模拟收到付款，设置 Redis 中的标记（有效期10分钟）
+    key = f"paid:{branch}:{visitor_id}"
+    redis_client.setex(key, 600, '1')  # 10分钟过期
+    return f"Mock paid for {visitor_id} at {branch}"
+
+# ========== 主程序入口 ==========
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
